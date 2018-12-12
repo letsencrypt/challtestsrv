@@ -126,7 +126,7 @@ func New(config Config) (*ChallSrv, error) {
 
 	challSrv := &ChallSrv{
 		log:            config.Log,
-		requestHistory: make([]RequestEvent),
+		requestHistory: []RequestEvent{},
 		httpOne:        make(map[string]string),
 		dnsOne:         make(map[string][]string),
 		tlsALPNOne:     make(map[string]string),
