@@ -1,6 +1,12 @@
 package challtestsrv
 
-import "github.com/miekg/dns"
+import (
+	"fmt"
+	"net"
+	"strings"
+
+	"github.com/miekg/dns"
+)
 
 // RequestEventType indicates what type of event occurred.
 type RequestEventType int
@@ -40,8 +46,12 @@ func (e HTTPRequestEvent) Type() RequestEventType {
 	return HTTPRequestEventType
 }
 
-// HTTPRequestEvents use the HTTP Host as the storage key
+// HTTPRequestEvents use the HTTP Host as the storage key. Any explicit port
+// will be removed.
 func (e HTTPRequestEvent) Key() string {
+	if h, _, err := net.SplitHostPort(e.Host); err == nil {
+		return h
+	}
 	return e.Host
 }
 
@@ -57,9 +67,14 @@ func (e DNSRequestEvent) Type() RequestEventType {
 	return DNSRequestEventType
 }
 
-// DNSRequestEvents use the Question Name as the storage key
+// DNSRequestEvents use the Question Name as the storage key. Any trailing `.`
+// in the question name is removed.
 func (e DNSRequestEvent) Key() string {
-	return e.Question.Name
+	key := e.Question.Name
+	if strings.HasSuffix(key, ".") {
+		key = strings.TrimSuffix(key, ".")
+	}
+	return key
 }
 
 // TLSALPNRequestEvent corresponds to a TLS request received by
