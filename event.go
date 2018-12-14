@@ -1,7 +1,6 @@
 package challtestsrv
 
 import (
-	"fmt"
 	"net"
 	"strings"
 
