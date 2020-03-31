@@ -67,6 +67,9 @@ A not-so-up-to-date-list-that-may-be-actually-current:
 * https://github.com/rs/dnstrace
 * https://blitiri.com.ar/p/dnss ([github mirror](https://github.com/albertito/dnss))
 * https://github.com/semihalev/sdns
+* https://render.com
+* https://github.com/peterzen/goresolver
+* https://github.com/folbricht/routedns
 
 Send pull request if you want to be listed here.
 
@@ -91,16 +94,16 @@ DNS Authors 2012-
 
 # Building
 
-Building is done with the `go` tool. If you have setup your GOPATH correctly, the following should
-work:
+This library uses Go modules and uses semantic versioning. Building is done with the `go` tool, so
+the following should work:
 
     go get github.com/miekg/dns
     go build github.com/miekg/dns
 
 ## Examples
 
-A short "how to use the API" is at the beginning of doc.go (this also will show
-when you call `godoc github.com/miekg/dns`).
+A short "how to use the API" is at the beginning of doc.go (this also will show when you call `godoc
+github.com/miekg/dns`).
 
 Example programs can be found in the `github.com/miekg/exdns` repository.
 
@@ -124,6 +127,7 @@ Example programs can be found in the `github.com/miekg/exdns` repository.
 * 2915 - NAPTR record
 * 2929 - DNS IANA Considerations
 * 3110 - RSASHA1 DNS keys
+* 3123 - APL record
 * 3225 - DO bit (DNSSEC OK)
 * 340{1,2,3} - NAPTR record
 * 3445 - Limiting the scope of (DNS)KEY
@@ -150,6 +154,7 @@ Example programs can be found in the `github.com/miekg/exdns` repository.
 * 6844 - CAA record
 * 6891 - EDNS0 update
 * 6895 - DNS IANA considerations
+* 6944 - DNSSEC DNSKEY Algorithm Status
 * 6975 - Algorithm Understanding in DNSSEC
 * 7043 - EUI48/EUI64 records
 * 7314 - DNS (EDNS) EXPIRE Option
@@ -158,8 +163,9 @@ Example programs can be found in the `github.com/miekg/exdns` repository.
 * 7553 - URI record
 * 7858 - DNS over TLS: Initiation and Performance Considerations
 * 7871 - EDNS0 Client Subnet
-* 7873 - Domain Name System (DNS) Cookies (draft-ietf-dnsop-cookies)
+* 7873 - Domain Name System (DNS) Cookies
 * 8080 - EdDSA for DNSSEC
+* 8499 - DNS Terminology
 
 ## Loosely Based Upon
 
