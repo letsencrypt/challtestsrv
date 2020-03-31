@@ -70,7 +70,7 @@ func (s *ChallSrv) txtAnswers(q dns.Question) []dns.RR {
 	return records
 }
 
-// aAnswers is a dnsAnswerFunc that creates A RR's for the given question using
+//  aAnswers is a dnsAnswerFunc that creates A RR's for the given question using
 // the ChallSrv's dns mock data. If there is not a mock ipv4 A response added
 // for the given hostname in the question the default IPv4 address will be used
 // for the response.
