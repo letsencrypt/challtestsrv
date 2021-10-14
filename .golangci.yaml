@@ -23,7 +23,6 @@ linters:
     - gomnd
     - wsl
     - goerr113
-    - nlreturn
     - godot
 
 issues:
