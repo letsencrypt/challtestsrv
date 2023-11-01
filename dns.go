@@ -1,6 +1,7 @@
 package challtestsrv
 
 import (
+	"context"
 	"net"
 
 	"github.com/miekg/dns"
@@ -86,20 +87,32 @@ func (s *ChallSrv) aAnswers(q dns.Question) []dns.RR {
 		values = []string{defaultIPv4}
 	}
 	for _, resp := range values {
+		var ipAddrs []net.IP
 		ipAddr := net.ParseIP(resp)
 		if ipAddr == nil || ipAddr.To4() == nil {
-			// If the mock data isn't a valid IPv4 address, don't use it.
-			continue
+			var err error
+			// We resolve every time and do not cache it here but we leave
+			// it to the upstream resolver to cache it.
+			ipAddrs, err = net.DefaultResolver.LookupIP(context.Background(), "ip4", resp)
+			if err != nil {
+				// If the mock data isn't a valid IPv4 address and resolving
+				// it didn't work as well, don't use it.
+				continue
+			}
+		} else {
+			ipAddrs = []net.IP{ipAddr}
 		}
-		record := &dns.A{
-			Hdr: dns.RR_Header{
-				Name:   q.Name,
-				Rrtype: dns.TypeA,
-				Class:  dns.ClassINET,
-			},
-			A: ipAddr,
+		for _, ipAddr := range ipAddrs {
+			record := &dns.A{
+				Hdr: dns.RR_Header{
+					Name:   q.Name,
+					Rrtype: dns.TypeA,
+					Class:  dns.ClassINET,
+				},
+				A: ipAddr,
+			}
+			records = append(records, record)
 		}
-		records = append(records, record)
 	}
 	return records
 }
@@ -115,20 +128,32 @@ func (s *ChallSrv) aaaaAnswers(q dns.Question) []dns.RR {
 		values = []string{defaultIPv6}
 	}
 	for _, resp := range values {
+		var ipAddrs []net.IP
 		ipAddr := net.ParseIP(resp)
 		if ipAddr == nil || ipAddr.To4() != nil {
-			// If the mock data isn't a valid IPv6 address, don't use it.
-			continue
+			var err error
+			// We resolve every time and do not cache it here but we leave
+			// it to the upstream resolver to cache it.
+			ipAddrs, err = net.DefaultResolver.LookupIP(context.Background(), "ip6", resp)
+			if err != nil {
+				// If the mock data isn't a valid IPv6 address and resolving
+				// it didn't work as well, don't use it.
+				continue
+			}
+		} else {
+			ipAddrs = []net.IP{ipAddr}
 		}
-		record := &dns.AAAA{
-			Hdr: dns.RR_Header{
-				Name:   q.Name,
-				Rrtype: dns.TypeAAAA,
-				Class:  dns.ClassINET,
-			},
-			AAAA: ipAddr,
+		for _, ipAddr := range ipAddrs {
+			record := &dns.AAAA{
+				Hdr: dns.RR_Header{
+					Name:   q.Name,
+					Rrtype: dns.TypeAAAA,
+					Class:  dns.ClassINET,
+				},
+				AAAA: ipAddr,
+			}
+			records = append(records, record)
 		}
-		records = append(records, record)
 	}
 	return records
 }
