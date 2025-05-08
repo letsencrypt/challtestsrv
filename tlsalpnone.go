@@ -10,9 +10,12 @@ import (
 	"crypto/x509"
 	"crypto/x509/pkix"
 	"encoding/asn1"
+	"encoding/hex"
 	"fmt"
 	"math/big"
+	"net"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -73,7 +76,6 @@ func (s *ChallSrv) ServeChallengeCertFunc(k *ecdsa.PrivateKey) func(*tls.ClientH
 		}
 		certTmpl := x509.Certificate{
 			SerialNumber: big.NewInt(1729),
-			DNSNames:     []string{hello.ServerName},
 			ExtraExtensions: []pkix.Extension{
 				{
 					Id:       IDPeAcmeIdentifier,
@@ -81,6 +83,11 @@ func (s *ChallSrv) ServeChallengeCertFunc(k *ecdsa.PrivateKey) func(*tls.ClientH
 					Value:    extValue,
 				},
 			},
+		}
+		if strings.HasSuffix(hello.ServerName, ".arpa") {
+			certTmpl.IPAddresses = []net.IP{ipFromReverseAddr(hello.ServerName)}
+		} else {
+			certTmpl.DNSNames = []string{hello.ServerName}
 		}
 		certBytes, err := x509.CreateCertificate(rand.Reader, &certTmpl, &certTmpl, k.Public(), k)
 		if err != nil {
@@ -123,4 +130,29 @@ func tlsALPNOneServer(address string, challSrv *ChallSrv) challengeServer {
 	}
 	srv.SetKeepAlivesEnabled(false)
 	return challTLSServer{srv}
+}
+
+// we only care about full IPs, so only process if its right depth
+func ipFromReverseAddr(reverseAddr string) net.IP {
+	buf := strings.Split(reverseAddr, ".")
+	//reverse slice before go 1.21
+	for i, j := 0, len(buf)-1; i < j; i, j = i+1, j-1 {
+		buf[i], buf[j] = buf[j], buf[i]
+	}
+	// SNI doesn't allow trailing dot so it's right index
+	if buf[1] == "in-addr" && len(buf) == 6 {
+		return net.ParseIP(strings.Join(buf[2:], ".")).To4()
+	} else if buf[1] == "ip6" && len(buf) == 34 {
+		hexstring := strings.Join(buf[2:], "")
+		ipbyte, err := hex.DecodeString(hexstring)
+		if err != nil {
+			return net.IP{}
+		}
+		ip := net.IP(ipbyte)
+		if ip.To16() != nil {
+			return ip.To16()
+		}
+	}
+	// should not hit this
+	return net.IP{}
 }
