@@ -3,7 +3,7 @@
 [![Build Status](https://travis-ci.org/letsencrypt/challtestsrv.svg?branch=master)](https://travis-ci.org/letsencrypt/challtestsrv)
 [![Coverage Status](https://coveralls.io/repos/github/letsencrypt/challtestsrv/badge.svg)](https://coveralls.io/github/letsencrypt/challtestsrv)
 [![Go Report Card](https://goreportcard.com/badge/github.com/letsencrypt/challtestsrv)](https://goreportcard.com/report/github.com/letsencrypt/challtestsrv)
-[![GolangCI](https://golangci.com/badges/github.com/letsencrypt/challtestsrv.svg)](https://golangci.com/r/github.com/letsencrypt/challtestsrv)
+[![GolangCI](https://img.shields.io/badge/Goland-CI-green.svg)](https://golangci.com/r/github.com/letsencrypt/challtestsrv)
 
 The `challtestsrv` package offers a library that can be used by test
 code to respond to HTTP-01, DNS-01, and TLS-ALPN-01 ACME challenges. The
