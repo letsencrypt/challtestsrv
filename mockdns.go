@@ -43,8 +43,8 @@ func (s *ChallSrv) GetDefaultDNSIPv6() string {
 func (s *ChallSrv) AddDNSCNAMERecord(host string, value string) {
 	s.challMu.Lock()
 	defer s.challMu.Unlock()
-	host = dns.Fqdn(host)
-	value = dns.Fqdn(value)
+	host = dns.CanonicalName(host)
+	value = dns.CanonicalName(value)
 	s.dnsMocks.cnameRecords[host] = value
 }
 
@@ -52,7 +52,7 @@ func (s *ChallSrv) AddDNSCNAMERecord(host string, value string) {
 // host and an empty string otherwise.
 func (s *ChallSrv) GetDNSCNAMERecord(host string) string {
 	s.challMu.RLock()
-	host = dns.Fqdn(host)
+	host = dns.CanonicalName(host)
 	defer s.challMu.RUnlock()
 	return s.dnsMocks.cnameRecords[host]
 }
@@ -61,7 +61,7 @@ func (s *ChallSrv) GetDNSCNAMERecord(host string) string {
 func (s *ChallSrv) DeleteDNSCNAMERecord(host string) {
 	s.challMu.Lock()
 	defer s.challMu.Unlock()
-	host = dns.Fqdn(host)
+	host = dns.CanonicalName(host)
 	delete(s.dnsMocks.cnameRecords, host)
 }
 
@@ -70,7 +70,7 @@ func (s *ChallSrv) DeleteDNSCNAMERecord(host string) {
 func (s *ChallSrv) AddDNSARecord(host string, addresses []string) {
 	s.challMu.Lock()
 	defer s.challMu.Unlock()
-	host = dns.Fqdn(host)
+	host = dns.CanonicalName(host)
 	s.dnsMocks.aRecords[host] = append(s.dnsMocks.aRecords[host], addresses...)
 }
 
@@ -79,7 +79,7 @@ func (s *ChallSrv) AddDNSARecord(host string, addresses []string) {
 func (s *ChallSrv) DeleteDNSARecord(host string) {
 	s.challMu.Lock()
 	defer s.challMu.Unlock()
-	host = dns.Fqdn(host)
+	host = dns.CanonicalName(host)
 	delete(s.dnsMocks.aRecords, host)
 }
 
@@ -87,7 +87,7 @@ func (s *ChallSrv) DeleteDNSARecord(host string) {
 // returned when querying for A records for the given host.
 func (s *ChallSrv) GetDNSARecord(host string) []string {
 	s.challMu.RLock()
-	host = dns.Fqdn(host)
+	host = dns.CanonicalName(host)
 	defer s.challMu.RUnlock()
 	return s.dnsMocks.aRecords[host]
 }
@@ -97,7 +97,7 @@ func (s *ChallSrv) GetDNSARecord(host string) []string {
 func (s *ChallSrv) AddDNSAAAARecord(host string, addresses []string) {
 	s.challMu.Lock()
 	defer s.challMu.Unlock()
-	host = dns.Fqdn(host)
+	host = dns.CanonicalName(host)
 	s.dnsMocks.aaaaRecords[host] = append(s.dnsMocks.aaaaRecords[host], addresses...)
 }
 
@@ -106,7 +106,7 @@ func (s *ChallSrv) AddDNSAAAARecord(host string, addresses []string) {
 func (s *ChallSrv) DeleteDNSAAAARecord(host string) {
 	s.challMu.Lock()
 	defer s.challMu.Unlock()
-	host = dns.Fqdn(host)
+	host = dns.CanonicalName(host)
 	delete(s.dnsMocks.aaaaRecords, host)
 }
 
@@ -115,7 +115,7 @@ func (s *ChallSrv) DeleteDNSAAAARecord(host string) {
 func (s *ChallSrv) GetDNSAAAARecord(host string) []string {
 	s.challMu.RLock()
 	defer s.challMu.RUnlock()
-	host = dns.Fqdn(host)
+	host = dns.CanonicalName(host)
 	return s.dnsMocks.aaaaRecords[host]
 }
 
@@ -124,7 +124,7 @@ func (s *ChallSrv) GetDNSAAAARecord(host string) []string {
 func (s *ChallSrv) AddDNSCAARecord(host string, policies []MockCAAPolicy) {
 	s.challMu.Lock()
 	defer s.challMu.Unlock()
-	host = dns.Fqdn(host)
+	host = dns.CanonicalName(host)
 	s.dnsMocks.caaRecords[host] = append(s.dnsMocks.caaRecords[host], policies...)
 }
 
@@ -133,7 +133,7 @@ func (s *ChallSrv) AddDNSCAARecord(host string, policies []MockCAAPolicy) {
 func (s *ChallSrv) DeleteDNSCAARecord(host string) {
 	s.challMu.Lock()
 	defer s.challMu.Unlock()
-	host = dns.Fqdn(host)
+	host = dns.CanonicalName(host)
 	delete(s.dnsMocks.caaRecords, host)
 }
 
@@ -142,7 +142,7 @@ func (s *ChallSrv) DeleteDNSCAARecord(host string) {
 func (s *ChallSrv) GetDNSCAARecord(host string) []MockCAAPolicy {
 	s.challMu.RLock()
 	defer s.challMu.RUnlock()
-	host = dns.Fqdn(host)
+	host = dns.CanonicalName(host)
 	return s.dnsMocks.caaRecords[host]
 }
 
@@ -151,7 +151,7 @@ func (s *ChallSrv) GetDNSCAARecord(host string) []MockCAAPolicy {
 func (s *ChallSrv) AddDNSServFailRecord(host string) {
 	s.challMu.Lock()
 	defer s.challMu.Unlock()
-	host = dns.Fqdn(host)
+	host = dns.CanonicalName(host)
 	s.dnsMocks.servFailRecords[host] = true
 }
 
@@ -160,7 +160,7 @@ func (s *ChallSrv) AddDNSServFailRecord(host string) {
 func (s *ChallSrv) DeleteDNSServFailRecord(host string) {
 	s.challMu.Lock()
 	defer s.challMu.Unlock()
-	host = dns.Fqdn(host)
+	host = dns.CanonicalName(host)
 	delete(s.dnsMocks.servFailRecords, host)
 }
 
@@ -169,6 +169,6 @@ func (s *ChallSrv) DeleteDNSServFailRecord(host string) {
 func (s *ChallSrv) GetDNSServFailRecord(host string) bool {
 	s.challMu.RLock()
 	defer s.challMu.RUnlock()
-	host = dns.Fqdn(host)
+	host = dns.CanonicalName(host)
 	return s.dnsMocks.servFailRecords[host]
 }
