@@ -56,7 +56,7 @@ func (e HTTPRequestEvent) Key() string {
 	return e.Host
 }
 
-// DNSRequestEvent corresponds to a DNS request received by a dnsOneServer. It
+// DNSRequestEvent corresponds to a DNS request received by a dnsServer. It
 // implements the RequestEvent interface.
 type DNSRequestEvent struct {
 	// The DNS question received.

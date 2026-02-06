@@ -1,13 +1,67 @@
 package challtestsrv
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"net"
 	"net/http"
+	"time"
 
 	"github.com/miekg/dns"
 )
+
+type dnsHandler func(dns.ResponseWriter, *dns.Msg)
+
+// dnsServer creates a DNS server that registers the provided handler with the
+// `miekg/dns` package. Because the DNS server runs both a UDP and a TCP
+// listener, two `server` objects are returned.
+func dnsServer(address string, handler dnsHandler) []challengeServer {
+	// Register the dnsHandler
+	dns.HandleFunc(".", handler)
+	// Create a UDP DNS server
+	udpServer := &dns.Server{
+		Addr:         address,
+		Net:          "udp",
+		ReadTimeout:  time.Second,
+		WriteTimeout: time.Second,
+	}
+	// Create a TCP DNS server
+	tcpServer := &dns.Server{
+		Addr:         address,
+		Net:          "tcp",
+		ReadTimeout:  time.Second,
+		WriteTimeout: time.Second,
+	}
+	return []challengeServer{udpServer, tcpServer}
+}
+
+type doh struct {
+	*http.Server
+	tlsCert, tlsCertKey string
+}
+
+func (s *doh) Shutdown() error {
+	return s.Server.Shutdown(context.Background())
+}
+
+func (s *doh) ListenAndServe() error {
+	return s.ListenAndServeTLS(s.tlsCert, s.tlsCertKey)
+}
+
+// dohServer creates a DNS-over-HTTPS server backed by the provided handler.
+func dohServer(address string, tlsCert, tlsCertKey string, handler http.Handler) *doh {
+	return &doh{
+		&http.Server{
+			Handler:      handler,
+			Addr:         address,
+			ReadTimeout:  time.Second,
+			WriteTimeout: time.Second,
+		},
+		tlsCert,
+		tlsCertKey,
+	}
+}
 
 // mockSOA returns a mock DNS SOA record with fake data.
 func mockSOA() *dns.SOA {
@@ -58,7 +112,7 @@ func (s *ChallSrv) cnameAnswers(q dns.Question) []dns.RR {
 // given hostname in the question no RR's will be returned.
 func (s *ChallSrv) txtAnswers(q dns.Question) []dns.RR {
 	var records []dns.RR
-	values := s.GetDNSOneChallenge(q.Name)
+	values := s.GetDNSTXTRecords(q.Name)
 	for _, resp := range values {
 		record := &dns.TXT{
 			Hdr: dns.RR_Header{
