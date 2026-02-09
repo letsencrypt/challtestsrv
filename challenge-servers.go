@@ -13,7 +13,7 @@ import (
 
 const (
 	// Default to using localhost for both A and AAAA queries that don't match
-	// more specific mock host data.
+	// a host in the dnsData maps.
 	defaultIPv4 = "127.0.0.1"
 	defaultIPv6 = "::1"
 )
@@ -72,18 +72,11 @@ type dnsData struct {
 	// A map of host to TXT records.
 	txtRecords map[string][]string
 	// A map of host to CAA policies for CAA responses.
-	caaRecords map[string][]MockCAAPolicy
+	caaRecords map[string][]CAAPolicy
 	// A map of host to CNAME records.
 	cnameRecords map[string]string
 	// A map of hostnames that should receive a SERVFAIL response for all queries.
 	servFailRecords map[string]bool
-}
-
-// MockCAAPolicy holds a tag and a value for a CAA record. See
-// https://tools.ietf.org/html/rfc6844
-type MockCAAPolicy struct {
-	Tag   string
-	Value string
 }
 
 // Config holds challenge server configuration
@@ -146,7 +139,7 @@ func New(config Config) (*ChallSrv, error) {
 			aRecords:        make(map[string][]string),
 			aaaaRecords:     make(map[string][]string),
 			txtRecords:      make(map[string][]string),
-			caaRecords:      make(map[string][]MockCAAPolicy),
+			caaRecords:      make(map[string][]CAAPolicy),
 			cnameRecords:    make(map[string]string),
 			servFailRecords: make(map[string]bool),
 		},

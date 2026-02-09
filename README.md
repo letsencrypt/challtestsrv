@@ -7,9 +7,9 @@
 
 The `challtestsrv` package offers a library that can be used by test
 code to respond to HTTP-01, DNS-01, and TLS-ALPN-01 ACME challenges. The
-`challtestsrv` package can also be used as a mock DNS server letting
-developers mock `A`, `AAAA`, `CNAME`, and `CAA` DNS data for specific hostnames.
-The mock server will resolve up to one level of `CNAME` aliasing for accepted
+`challtestsrv` package can also be used as a DNS server letting
+developers configure `A`, `AAAA`, `CNAME`, and `CAA` DNS data for specific hostnames.
+The DNS server will resolve up to one level of `CNAME` aliasing for accepted
 DNS request types.
 
 **Important note: The `challtestsrv` library is for TEST USAGE
