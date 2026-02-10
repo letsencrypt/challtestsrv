@@ -249,11 +249,28 @@ func (s *ChallSrv) txtAnswers(q dns.Question) []dns.RR {
 				Rrtype: dns.TypeTXT,
 				Class:  dns.ClassINET,
 			},
-			Txt: []string{resp},
+			Txt: splitTXTRecordValue(resp),
 		}
 		records = append(records, record)
 	}
 	return records
+}
+
+// splitTXTRecordValue splits a TXT value into RFC 1035 <character-string>
+// chunks of at most 255 octets so long TXT values can be represented as
+// multiple strings in one RR.
+func splitTXTRecordValue(value string) []string {
+	const maxTXTStringOctets = 255
+	if len(value) <= maxTXTStringOctets {
+		return []string{value}
+	}
+
+	chunks := make([]string, 0, (len(value)+maxTXTStringOctets-1)/maxTXTStringOctets)
+	for start := 0; start < len(value); start += maxTXTStringOctets {
+		end := min(start+maxTXTStringOctets, len(value))
+		chunks = append(chunks, value[start:end])
+	}
+	return chunks
 }
 
 // aAnswers is a dnsAnswerFunc that creates A RR's for the given question using
