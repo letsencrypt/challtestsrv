@@ -265,10 +265,13 @@ func splitTXTRecordValue(value string) []string {
 		return []string{value}
 	}
 
-	chunks := make([]string, 0, (len(value)+maxTXTStringOctets-1)/maxTXTStringOctets)
-	for start := 0; start < len(value); start += maxTXTStringOctets {
-		end := min(start+maxTXTStringOctets, len(value))
-		chunks = append(chunks, value[start:end])
+	var chunks []string
+	for len(value) > maxTXTStringOctets {
+		chunks = append(chunks, value[:maxTXTStringOctets])
+		value = value[maxTXTStringOctets:]
+	}
+	if len(value) > 0 {
+		chunks = append(chunks, value)
 	}
 	return chunks
 }
