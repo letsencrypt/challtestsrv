@@ -398,7 +398,7 @@ func (s *ChallSrv) dohHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s.dnsHandlerInner(&dnsToHTTPWriter{w}, msg, r.Header.Get("User-Agent"))
+	s.dnsHandlerInner(&dnsToHTTPWriter{w}, msg, r.Header.Get("User-Agent"), "http")
 }
 
 // dnsHandler is a miekg/dns handler that can process a dns.Msg request and
@@ -407,7 +407,7 @@ func (s *ChallSrv) dohHandler(w http.ResponseWriter, r *http.Request) {
 // records. A host that is aliased by a CNAME record will follow that alias
 // one level and return the requested record types for that alias' target
 func (s *ChallSrv) dnsHandler(w dns.ResponseWriter, r *dns.Msg) {
-	s.dnsHandlerInner(w, r, "")
+	s.dnsHandlerInner(w, r, "", w.LocalAddr().Network())
 }
 
 // newDefaultSOA returns a DNS SOA record with sensible default values.
@@ -428,10 +428,9 @@ func newDefaultSOA() *dns.SOA {
 	}
 }
 
-func (s *ChallSrv) dnsHandlerInner(w writeMsg, r *dns.Msg, userAgent string) {
+func (s *ChallSrv) dnsHandlerInner(w writeMsg, r *dns.Msg, userAgent string, proto string) {
 	m := new(dns.Msg)
 	m.SetReply(r)
-	m.Compress = false
 
 	// For each question, add answers based on the type of question
 	for _, q := range r.Question {
@@ -482,6 +481,17 @@ func (s *ChallSrv) dnsHandlerInner(w writeMsg, r *dns.Msg, userAgent string) {
 	}
 
 	m.Ns = append(m.Ns, newDefaultSOA())
+
+	if proto == "udp" {
+		if opt := r.IsEdns0(); opt != nil {
+			m.Truncate(int(opt.UDPSize()))
+		} else {
+			m.Truncate(dns.MinMsgSize)
+		}
+	} else {
+		m.Truncate(dns.MaxMsgSize)
+	}
+
 	_ = w.WriteMsg(m)
 }
 
