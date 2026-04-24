@@ -432,6 +432,9 @@ func (s *ChallSrv) dnsHandlerInner(w writeMsg, r *dns.Msg, userAgent string) {
 	m := new(dns.Msg)
 	m.SetReply(r)
 	m.Compress = false
+	// AA: challtestsrv is the authoritative server for every name it answers
+	// (RFC 1035 §4.1.1).
+	m.Authoritative = true
 
 	// For each question, add answers based on the type of question
 	for _, q := range r.Question {
